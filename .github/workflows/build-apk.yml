@@ -1,0 +1,61 @@
+name: Build AstiMira Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradle.properties"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: Build and publish standalone AstiMira APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out AstiMira repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Compile the independent Android app
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Verify package and prepare standalone APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          cp "$APK" AstiMira-VisionStack-debug.apk
+          ls -lh AstiMira-VisionStack-debug.apk
+
+      # Use Releases rather than Actions Artifacts: user's Actions artifact storage hit quota previously.
+      - name: Publish APK in this repository's prereleases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="astimira-test-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" AstiMira-VisionStack-debug.apk \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "AstiMira VisionStack Android test #${GITHUB_RUN_NUMBER}" \
+            --notes "AstiMira standalone Android debug APK. Experimental layered video filters; not medical vision correction."
