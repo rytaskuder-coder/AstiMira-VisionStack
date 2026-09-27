@@ -24,12 +24,23 @@
 
 Откройте **именно этот репозиторий** в Android Studio с JDK 17. Требуется Android SDK 35.
 
-Команда (если установлен Gradle 8.11.1):
+Команда из корня проекта с уже включённым Gradle wrapper:
 
 ```sh
-gradle :app:assembleDebug
+./gradlew :app:assembleDebug
 ```
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
 **Только этот самостоятельный проект:** workflow собирает приложение из корня текущего репозитория и публикует APK в собственных Releases.
+
+## Android Studio на компьютере
+
+1. Открой **Android Studio → Get from VCS** (или **File → New → Project from Version Control**).
+2. Вставь **https://github.com/rytaskuder-coder/AstiMira-VisionStack.git** и нажми **Clone**.
+3. Открой **корень AstiMira-VisionStack** (там, где `settings.gradle.kts` и `gradlew.bat`), согласись на **Trust Project** и дождись **Gradle Sync**.
+4. Выбери **app → Run ▶** и подключённый Samsung с включённой отладкой по USB. Или через меню **Build → Build APK(s)** создай файл `app/build/outputs/apk/debug/app-debug.apk`.
+
+Android Studio загрузит Gradle 8.11.1 с помощью `gradle/wrapper/`. Потребуются установленный Android SDK 35 и JDK 17, которые Android Studio может предложить установить при синхронизации. Windows: для ручной сборки в терминале используй `gradlew.bat :app:assembleDebug`.
+
+Исходный код — файлы в `app/src/main/java/lt/astimira/visionstack/`. Все изменения делаются **только в этом репозитории**.
